@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Carbon Footprint Predictor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        background: linear-gradient(120deg, #84fab0, #8fd3f4);
+        margin: 0;
+        padding: 0;
+        color: #333;
+        animation: fadeIn 0.8s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    .container {
+        max-width: 950px;
+        margin: auto;
+        padding: 25px;
+    }
+    h1 {
+        text-align: center;
+        color: #004d40;
+        font-size: 2rem;
+        margin-bottom: 15px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    form {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0px 6px 15px rgba(0,0,0,0.2);
+        transition: transform 0.2s ease;
+    }
+    form:hover {
+        transform: translateY(-3px);
+    }
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    .field label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 6px;
+        color: #00695c;
+    }
+    .field input, .field textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #bbb;
+        border-radius: 8px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        font-size: 15px;
+    }
+    .field input:focus, .field textarea:focus {
+        border-color: #00796b;
+        box-shadow: 0 0 8px rgba(0,121,107,0.3);
+        outline: none;
+    }
+    button {
+        background: linear-gradient(90deg, #00796b, #004d40);
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background 0.3s ease, transform 0.2s ease;
+        margin-top: 15px;
+    }
+    button:hover {
+        background: linear-gradient(90deg, #004d40, #002d27);
+        transform: scale(1.03);
+    }
+    h3 {
+        margin-top: 25px;
+        color: #004d40;
+        border-left: 4px solid #00796b;
+        padding-left: 8px;
+    }
+    .result {
+        margin-top: 25px;
+        padding: 18px;
+        background: #e0f7fa;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #00695c;
+        text-align: center;
+        box-shadow: 0px 4px 8px rgba(0,0,0,0.15);
+        animation: slideUp 0.5s ease;
+    }
+    @keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Carbon Footprint Predictor(EIA)</h1>
+    <form method="POST">
+        <div class="grid">
+            <div class="field">
+                <label>Year of reporting</label>
+                <input type="number" name="year_of_reporting" min="1900" max="2100"
+                       placeholder="e.g. 2022" value="{{ (latest_inputs.year_of_reporting if latest_inputs) or '' }}" required>
+            </div>
+            <div class="field">
+                <label>Product weight (kg)</label>
+                <input type="number" step="any" min="0" name="product_weight_kg"
+                       placeholder="e.g. 1.25" value="{{ (latest_inputs.product_weight_kg if latest_inputs) or '' }}" required>
+            </div>
+            <div class="field">
+                <label>Relative change in PCF vs previous (%)</label>
+                <input type="number" step="any" name="relative_change_pct"
+                       placeholder="e.g. 12" value="{{ (latest_inputs.relative_change_pct if latest_inputs) or '' }}">
+            </div>
+        </div>
+
+        <h3>Stage Fractions (%)</h3>
+        <div class="grid">
+            <div class="field"><label>Upstream %</label><input type="number" step="any" name="upstream_pct" value="{{ (latest_inputs.upstream_pct if latest_inputs) or '' }}"></div>
+            <div class="field"><label>Operations %</label><input type="number" step="any" name="operations_pct" value="{{ (latest_inputs.operations_pct if latest_inputs) or '' }}"></div>
+            <div class="field"><label>Downstream %</label><input type="number" step="any" name="downstream_pct" value="{{ (latest_inputs.downstream_pct if latest_inputs) or '' }}"></div>
+            <div class="field"><label>Transport %</label><input type="number" step="any" name="transport_pct" value="{{ (latest_inputs.transport_pct if latest_inputs) or '' }}"></div>
+            <div class="field"><label>End-of-Life %</label><input type="number" step="any" name="eol_pct" value="{{ (latest_inputs.eol_pct if latest_inputs) or '' }}"></div>
+        </div>
+
+        <h3>Text Inputs</h3>
+        <div class="grid">
+            <div class="field"><label>Product detail</label><textarea name="product_detail" rows="3">{{ (latest_inputs.product_detail if latest_inputs) or '' }}</textarea></div>
+            <div class="field"><label>Company-reported reason for change</label><textarea name="change_reason" rows="3">{{ (latest_inputs.change_reason if latest_inputs) or '' }}</textarea></div>
+        </div>
+
+        <button type="submit">🚀 Predict</button>
+    </form>
+
+    {% if prediction is not none %}
+    <div class="result">
+        {{ prediction }}
+    </div>
+    {% endif %}
+</div>
+</body>
+</html>
